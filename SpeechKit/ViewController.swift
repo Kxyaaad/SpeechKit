@@ -8,8 +8,10 @@
 
 import UIKit
 import Speech
+import MediaPlayer
+import AVKit
 
-class ViewController: UIViewController,SFSpeechRecognizerDelegate {
+class ViewController: UIViewController,SFSpeechRecognizerDelegate,AVSpeechSynthesizerDelegate {
     
     
     @IBOutlet weak var text: UITextField!
@@ -127,7 +129,30 @@ class ViewController: UIViewController,SFSpeechRecognizerDelegate {
         }
         
     }
-    
+    var message = "测试音频"
+    let synth = AVSpeechSynthesizer() //TTS对象
+    let audioSession = AVAudioSession.sharedInstance() //语音引擎
+    @IBAction func speak(_ sender: Any) {
+        synth.delegate = self
+        if !message.isEmpty {
+            do {
+                // 设置语音环境，保证能朗读出声音（特别是刚做过语音识别，这句话必加，不然没声音）
+                try audioSession.setCategory(AVAudioSessionCategoryAmbient)
+            }catch let error as NSError{
+                print(error.code)
+            }
+            //需要转的文本
+            let utterance = AVSpeechUtterance.init(string: message)
+            //设置语言，这里是中文
+            utterance.voice = AVSpeechSynthesisVoice.init(language: "zh_CN")
+            //设置声音大小
+            utterance.volume = 1
+            //设置音频
+            utterance.pitchMultiplier = 1.1
+            //开始朗读
+            synth.speak(utterance)
+        }
+    }
     
 
     override func didReceiveMemoryWarning() {
